@@ -22,14 +22,45 @@ Ide konten sering hilang karena tidak ada tempat capture yang cepat — kadang l
 - Sistem yang mem-parse dan mengorganisir otomatis di belakang layar (platform, format, isi ide) — bukan user yang harus mengkategorikan manual di awal.
 
 ### Loop 2 — Dashboard
-- Menampilkan **status semua konten, dikelompokkan per akun sosial media**.
+- Menampilkan **status semua konten, dikelompokkan per tema/persona**.
 - Fokus pada ringkasan yang cepat dipahami sekali lihat, bukan tabel padat berisi semua kolom sekaligus.
+
+## Tema & Akun
+
+Satu ide selalu terikat ke satu tema. Tema yang sama bisa dieksekusi ke IG dan/atau TikTok (masing-masing dengan progress sendiri).
+
+| Tema | IG | TikTok |
+|---|---|---|
+| Belajar AI bareng Beny | @belajaraibarengbeny | @belajaraibarengbeny |
+| Cerita Kirana Larasati | @ceritakirana.larasati | — |
+| Daily Life Nara(a) | @dailylifenaraa | @dailylifenara |
+| Liburan Seru bareng Bem | @liburanserubarengbem | @liburanserubarengbem |
+| Cerita Kopi Beny | @ceritakopibeny | @ceritakopibeny |
+
+## Data Model
+
+### Ide (level atas, 1 per ide)
+- Ide mentah — teks asli hasil capture ("curhat")
+- Judul/hook — ringkasan otomatis, untuk gampang di-scan di dashboard
+- Tema — salah satu dari 5 tema di atas
+- Catatan — opsional
+- Tanggal dibuat
+
+### Eksekusi per platform (nempel ke 1 ide, bisa 1 atau 2 baris: IG dan/atau TikTok)
+- Platform — IG / TikTok
+- Status — `Ide baru` → `Draft` → `Terjadwal` → `Tayang` (+ `Skip` untuk ide yang tidak jadi dipakai)
+- Format — video, carousel, reels, story, dll
+- Tanggal rencana tayang
+
+Status dan format disimpan **per platform**, bukan per ide — karena progress IG dan TikTok untuk ide yang sama bisa berbeda (mis. IG sudah Tayang, TikTok masih Draft).
+
+### Tampilan dashboard
+Grouping utama per Tema (5 grup). Tiap ide jadi satu kartu ringkas menampilkan judul/hook + chip status kecil per platform (mis. `IG: Tayang` `TikTok: Draft`), tanpa membuka detail satu per satu.
 
 ## Di Luar Scope (Fase 2+)
 - Generate video AI dari ide konten (fase 2, setelah loop capture + dashboard terbukti terpakai konsisten).
 - Ide lain dari sesi brainstorming (aplikasi serba-bisa untuk UMKM) — jalur terpisah, tidak digabung ke produk ini.
 
 ## Pertanyaan Terbuka (untuk sesi berikutnya)
-- Data model: field apa saja yang perlu tersimpan per ide/konten (platform, format, status, tanggal, catatan, dll).
-- Daftar status yang dipakai di dashboard (mis. ide baru → draft → terjadwal → tayang).
 - Bentuk teknis: web app, atau bentuk lain.
+- Cara capture ide dijalankan sehari-hari (chat langsung, bot Telegram/WhatsApp, dll).
