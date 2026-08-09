@@ -1,31 +1,55 @@
-import { createClient, type Client } from "@libsql/client";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
+import { SCHEMA_STATEMENTS } from "./schema";
 
 declare global {
   // eslint-disable-next-line no-var
-  var __dbClient: Client | undefined;
+  var __sqlClient: NeonQueryFunction<false, false> | undefined;
   // eslint-disable-next-line no-var
-  var __dbInitialized: boolean | undefined;
+  var __schemaReady: Promise<void> | undefined;
 }
 
-function buildClient(): Client {
-  const url = process.env.TURSO_DATABASE_URL ?? "file:local.db";
-  const authToken = process.env.TURSO_AUTH_TOKEN;
-  return createClient(authToken ? { url, authToken } : { url });
-}
-
-export function getDb(): Client {
-  if (!global.__dbClient) {
-    global.__dbClient = buildClient();
+/**
+ * Neon's Vercel integration injects DATABASE_URL; POSTGRES_URL is accepted as a
+ * fallback so other Postgres providers work without a code change.
+ */
+function connectionString(): string {
+  const url = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
+  if (!url) {
+    throw new Error("DATABASE_URL env var is not set");
   }
-  return global.__dbClient;
+  return url;
 }
 
-export async function ensureSchema(): Promise<void> {
-  if (global.__dbInitialized) return;
-  const db = getDb();
-  const schema = readFileSync(join(process.cwd(), "lib", "schema.sql"), "utf-8");
-  await db.executeMultiple(schema);
-  global.__dbInitialized = true;
+export function getSql(): NeonQueryFunction<false, false> {
+  if (!global.__sqlClient) {
+    global.__sqlClient = neon(connectionString());
+  }
+  return global.__sqlClient;
+}
+
+export type Row = Record<string, unknown>;
+
+export async function query(text: string, params: unknown[] = []): Promise<Row[]> {
+  await ensureSchema();
+  const rows = await getSql().query(text, params);
+  return rows as Row[];
+}
+
+/**
+ * Cached as a promise, not a boolean, so concurrent requests on a cold start
+ * await the same run instead of each firing the DDL.
+ */
+export function ensureSchema(): Promise<void> {
+  if (!global.__schemaReady) {
+    global.__schemaReady = (async () => {
+      const sql = getSql();
+      for (const statement of SCHEMA_STATEMENTS) {
+        await sql.query(statement);
+      }
+    })().catch((err) => {
+      global.__schemaReady = undefined;
+      throw err;
+    });
+  }
+  return global.__schemaReady;
 }

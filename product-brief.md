@@ -64,7 +64,7 @@ Grouping utama per Tema (5 grup). Tiap ide jadi satu kartu ringkas menampilkan j
 ## Bentuk Teknis
 
 - **Web app** — satu tempat untuk capture (input "curhat") dan dashboard, dibangun dengan **Next.js**.
-- **Database:** SQLite — cukup untuk 1 pengguna, tidak butuh server database terpisah.
+- **Database:** **Neon Postgres**, dibuat lewat tab Storage di dashboard Vercel — connection string otomatis ke-inject ke project, tidak perlu copy-paste kredensial manual.
 - **AI parsing:** modul terpisah (mudah diganti provider) —
   - Fase 1 (dogfooding): **Gemini API** (tier gratis).
   - Fase 2 (kalau dijual): pindah ke **Claude API**.

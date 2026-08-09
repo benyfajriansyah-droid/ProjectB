@@ -2,6 +2,10 @@ import Link from "next/link";
 import { listIdeas } from "@/lib/ideas";
 import { TEMAS, STATUS_LABELS, type Status } from "@/lib/constants";
 
+// Ide berubah tiap kali capture/status di-update, jadi dashboard harus dibaca
+// ulang tiap request — bukan di-prerender sekali saat build.
+export const dynamic = "force-dynamic";
+
 const STATUS_STYLES: Record<Status, string> = {
   ide_baru: "bg-white/10 text-white/70",
   draft: "bg-yellow-500/20 text-yellow-300",
