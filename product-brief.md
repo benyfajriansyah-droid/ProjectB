@@ -69,7 +69,14 @@ Grouping utama per Tema (5 grup). Tiap ide jadi satu kartu ringkas menampilkan j
   - Fase 1 (dogfooding): **Gemini API** (tier gratis).
   - Fase 2 (kalau dijual): pindah ke **Claude API**.
 - **Hosting:** deploy online (mis. Vercel, tier gratis) — supaya bisa diakses dari HP kapan saja, bukan cuma dari laptop.
+- **Proteksi akses:** satu password/PIN untuk seluruh app (bukan sistem akun/login penuh, karena hanya 1 pengguna).
+
+## Halaman v1
+
+1. **Login** — masukin password, sekali per sesi.
+2. **Capture** — input teks bebas ("curhat"), AI parse otomatis jadi tema/hook/platform/format, ada preview hasil parse yang bisa dikoreksi sebelum disimpan.
+3. **Dashboard** — daftar ide dikelompokkan per tema, tiap kartu menampilkan hook + chip status per platform.
+4. **Detail Ide** — buka satu ide untuk edit status, format, tanggal rencana tayang, atau catatan.
 
 ## Pertanyaan Terbuka (untuk sesi berikutnya)
-- Proteksi akses (karena di-deploy online dan datanya personal) — bentuk paling ringan: satu password/PIN untuk seluruh app, bukan sistem akun penuh.
-- Susunan halaman/screen: apa saja halaman yang dibutuhkan di v1 (mis. halaman capture, dashboard, detail ide).
+- (belum ada — siap lanjut ke scaffolding kode)
