@@ -61,6 +61,15 @@ Grouping utama per Tema (5 grup). Tiap ide jadi satu kartu ringkas menampilkan j
 - Generate video AI dari ide konten (fase 2, setelah loop capture + dashboard terbukti terpakai konsisten).
 - Ide lain dari sesi brainstorming (aplikasi serba-bisa untuk UMKM) — jalur terpisah, tidak digabung ke produk ini.
 
+## Bentuk Teknis
+
+- **Web app** — satu tempat untuk capture (input "curhat") dan dashboard, dibangun dengan **Next.js**.
+- **Database:** SQLite — cukup untuk 1 pengguna, tidak butuh server database terpisah.
+- **AI parsing:** modul terpisah (mudah diganti provider) —
+  - Fase 1 (dogfooding): **Gemini API** (tier gratis).
+  - Fase 2 (kalau dijual): pindah ke **Claude API**.
+- **Hosting:** deploy online (mis. Vercel, tier gratis) — supaya bisa diakses dari HP kapan saja, bukan cuma dari laptop.
+
 ## Pertanyaan Terbuka (untuk sesi berikutnya)
-- Bentuk teknis: web app, atau bentuk lain.
-- Cara capture ide dijalankan sehari-hari (chat langsung, bot Telegram/WhatsApp, dll).
+- Proteksi akses (karena di-deploy online dan datanya personal) — bentuk paling ringan: satu password/PIN untuk seluruh app, bukan sistem akun penuh.
+- Susunan halaman/screen: apa saja halaman yang dibutuhkan di v1 (mis. halaman capture, dashboard, detail ide).
