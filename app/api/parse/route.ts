@@ -8,6 +8,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Teks ide kosong" }, { status: 400 });
   }
 
+  if (!process.env.GEMINI_API_KEY) {
+    const { MISSING_GEMINI_KEY_MESSAGE } = await import("@/lib/ai/gemini");
+    return NextResponse.json({ error: MISSING_GEMINI_KEY_MESSAGE }, { status: 503 });
+  }
+
   try {
     const parsed = await parseIdeaText(rawText);
     return NextResponse.json(parsed);

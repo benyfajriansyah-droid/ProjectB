@@ -1,5 +1,15 @@
 export const SESSION_COOKIE = "session";
 
+export const MISSING_PASSWORD_MESSAGE =
+  "Setup belum lengkap: environment variable APP_PASSWORD belum diisi.\n\n" +
+  "Buka Vercel > Settings > Environment Variables, tambahkan APP_PASSWORD, " +
+  "lalu jalankan Redeploy (env var baru tidak otomatis dipakai deployment lama).";
+
+/** Without a password there is nothing to check against, so access is denied. */
+export function isAuthConfigured(): boolean {
+  return Boolean(process.env.APP_PASSWORD);
+}
+
 async function sha256Hex(value: string): Promise<string> {
   const data = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", data);

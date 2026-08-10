@@ -2,9 +2,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { TEMAS, platformsForTema, type Platform, type TemaId } from "../constants";
 import type { IdeaParser } from "./parse";
 
+export const MISSING_GEMINI_KEY_MESSAGE =
+  "Setup belum lengkap: GEMINI_API_KEY belum diisi. " +
+  "Ambil key gratis di https://aistudio.google.com/apikey, " +
+  "tambahkan di Vercel > Settings > Environment Variables, lalu Redeploy.";
+
 function client() {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY env var is not set");
+  if (!apiKey) throw new Error(MISSING_GEMINI_KEY_MESSAGE);
   return new GoogleGenerativeAI(apiKey);
 }
 

@@ -37,7 +37,11 @@ export default function CapturePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rawText }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        setError(body?.error ?? "Gagal memproses ide. Coba lagi.");
+        return;
+      }
       const parsed = (await res.json()) as {
         hook: string;
         tema: TemaId;
@@ -120,7 +124,7 @@ export default function CapturePage() {
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="whitespace-pre-line text-sm text-red-400">{error}</p>}
 
       {hasPreview && (
         <div className="space-y-4 rounded-xl border border-white/10 bg-white/5 p-4">

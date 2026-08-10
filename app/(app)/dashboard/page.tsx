@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listIdeas } from "@/lib/ideas";
+import { MISSING_DATABASE_MESSAGE, isDbConfigured } from "@/lib/db";
 import { TEMAS, STATUS_LABELS, type Status } from "@/lib/constants";
 
 // Ide berubah tiap kali capture/status di-update, jadi dashboard harus dibaca
@@ -15,6 +16,17 @@ const STATUS_STYLES: Record<Status, string> = {
 };
 
 export default async function DashboardPage() {
+  if (!isDbConfigured()) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-lg font-semibold">Dashboard</h1>
+        <p className="whitespace-pre-line rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
+          {MISSING_DATABASE_MESSAGE}
+        </p>
+      </div>
+    );
+  }
+
   const ideas = await listIdeas();
 
   return (

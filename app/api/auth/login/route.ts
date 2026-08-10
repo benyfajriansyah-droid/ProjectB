@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE, expectedSessionToken, isValidPassword } from "@/lib/auth";
+import {
+  MISSING_PASSWORD_MESSAGE,
+  SESSION_COOKIE,
+  expectedSessionToken,
+  isAuthConfigured,
+  isValidPassword,
+} from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
+  // Checked before comparing: without APP_PASSWORD every attempt would fail as
+  // "wrong password", which points at the wrong problem.
+  if (!isAuthConfigured()) {
+    return NextResponse.json({ error: MISSING_PASSWORD_MESSAGE }, { status: 503 });
+  }
+
   const { password } = (await request.json()) as { password?: string };
 
   if (!password || !(await isValidPassword(password))) {

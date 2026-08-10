@@ -12,10 +12,19 @@ declare global {
  * Neon's Vercel integration injects DATABASE_URL; POSTGRES_URL is accepted as a
  * fallback so other Postgres providers work without a code change.
  */
+export const MISSING_DATABASE_MESSAGE =
+  "Setup belum lengkap: database belum terhubung (DATABASE_URL kosong).\n\n" +
+  "Buka Vercel > tab Storage > Create Database > pilih Neon. " +
+  "Connection string-nya otomatis terpasang, lalu jalankan Redeploy.";
+
+export function isDbConfigured(): boolean {
+  return Boolean(process.env.DATABASE_URL ?? process.env.POSTGRES_URL);
+}
+
 function connectionString(): string {
   const url = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
   if (!url) {
-    throw new Error("DATABASE_URL env var is not set");
+    throw new Error(MISSING_DATABASE_MESSAGE);
   }
   return url;
 }

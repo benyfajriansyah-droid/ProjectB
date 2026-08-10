@@ -23,7 +23,9 @@ export default function LoginPage() {
     setLoading(false);
 
     if (!res.ok) {
-      setError("Password salah, coba lagi.");
+      const body = (await res.json().catch(() => null)) as { error?: string } | null;
+      // A 503 means the server is misconfigured, not that the password is wrong.
+      setError(res.status === 503 && body?.error ? body.error : "Password salah, coba lagi.");
       return;
     }
 
@@ -47,7 +49,7 @@ export default function LoginPage() {
           className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 outline-none focus:border-white/30"
           placeholder="Password"
         />
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="whitespace-pre-line text-sm text-red-400">{error}</p>}
         <button
           type="submit"
           disabled={loading}
