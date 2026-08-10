@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { TEMAS, platformsForTema, type Platform, type TemaId } from "../constants";
 import type { IdeaParser } from "./parse";
 
@@ -7,15 +7,41 @@ export const MISSING_GEMINI_KEY_MESSAGE =
   "Ambil key gratis di https://aistudio.google.com/apikey, " +
   "tambahkan di Vercel > Settings > Environment Variables, lalu Redeploy.";
 
+const DEFAULT_MODEL = "gemini-flash-latest";
+
 function client() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error(MISSING_GEMINI_KEY_MESSAGE);
-  return new GoogleGenerativeAI(apiKey);
+  return new GoogleGenAI({ apiKey });
 }
 
 const temaList = TEMAS.map((t) => `- ${t.id}: ${t.label}`).join("\n");
 
-type RawGeminiResponse = {
+/**
+ * Constrains the model's output shape so a malformed reply can't reach the
+ * parser — the API rejects anything off-schema before we see it.
+ */
+const RESPONSE_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    hook: { type: Type.STRING },
+    tema: { type: Type.STRING, enum: TEMAS.map((t) => t.id) },
+    platforms: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          platform: { type: Type.STRING, enum: ["ig", "tiktok"] },
+          format: { type: Type.STRING },
+        },
+        required: ["platform", "format"],
+      },
+    },
+  },
+  required: ["hook", "tema", "platforms"],
+};
+
+type RawResponse = {
   hook: string;
   tema: string;
   platforms: { platform: string; format: string }[];
@@ -28,12 +54,9 @@ Tema yang tersedia (pilih salah satu id):
 ${temaList}
 
 Dari teks ide di bawah, tentukan:
-1. "hook": ringkasan singkat ide ini, maksimal 10 kata, bahasa Indonesia.
+1. "hook": ringkasan singkat ide ini, maksimal 10 kata, bahasa Indonesia, ditulis menarik seperti judul konten.
 2. "tema": id tema yang paling cocok dari daftar di atas.
-3. "platforms": daftar platform yang relevan untuk ide ini ("ig" dan/atau "tiktok"), masing-masing dengan "format" singkat (mis. "reels", "carousel", "story", "video").
-
-Balas HANYA dengan JSON, tanpa penjelasan tambahan, dengan bentuk persis:
-{"hook": string, "tema": string, "platforms": [{"platform": "ig" | "tiktok", "format": string}]}
+3. "platforms": platform yang relevan ("ig" dan/atau "tiktok"), masing-masing dengan "format" singkat (mis. "reels", "carousel", "story", "video").
 
 Teks ide:
 """
@@ -43,14 +66,23 @@ ${rawText}
 
 export const geminiParser: IdeaParser = {
   async parse(rawText) {
-    const genAI = client();
-    const model = genAI.getGenerativeModel({
-      model: process.env.GEMINI_MODEL ?? "gemini-2.0-flash",
-      generationConfig: { responseMimeType: "application/json" },
+    const ai = client();
+
+    const response = await ai.models.generateContent({
+      model: process.env.GEMINI_MODEL ?? DEFAULT_MODEL,
+      contents: buildPrompt(rawText),
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: RESPONSE_SCHEMA,
+      },
     });
 
-    const result = await model.generateContent(buildPrompt(rawText));
-    const raw = JSON.parse(result.response.text()) as RawGeminiResponse;
+    const text = response.text;
+    if (!text) {
+      throw new Error("Gemini tidak mengembalikan jawaban (kemungkinan diblokir filter konten).");
+    }
+
+    const raw = JSON.parse(text) as RawResponse;
 
     const tema: TemaId = TEMAS.some((t) => t.id === raw.tema)
       ? (raw.tema as TemaId)
