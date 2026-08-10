@@ -76,7 +76,11 @@ export async function createIdea(input: NewIdea): Promise<string> {
 
 export async function listIdeas(): Promise<Idea[]> {
   const ideaRows = await query("SELECT * FROM ideas ORDER BY created_at DESC");
-  const execRows = await query("SELECT * FROM platform_executions");
+  // Ordered so the status chips keep a stable position between renders;
+  // Postgres gives no ordering guarantee otherwise.
+  const execRows = await query(
+    "SELECT * FROM platform_executions ORDER BY idea_id, platform",
+  );
 
   const execsByIdea = new Map<string, PlatformExecution[]>();
   for (const row of execRows) {
@@ -98,7 +102,7 @@ export async function getIdea(id: string): Promise<Idea | null> {
   if (!ideaRow) return null;
 
   const execRows = await query(
-    "SELECT * FROM platform_executions WHERE idea_id = $1",
+    "SELECT * FROM platform_executions WHERE idea_id = $1 ORDER BY platform",
     [id],
   );
 
