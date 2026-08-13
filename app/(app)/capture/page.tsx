@@ -97,7 +97,7 @@ export default function CapturePage() {
       });
       if (!res.ok) throw new Error();
 
-      router.push("/dashboard");
+      router.push("/konten");
       router.refresh();
     } catch {
       setError("Gagal menyimpan ide. Coba lagi.");

@@ -20,10 +20,10 @@ export default async function IdeaDetailPage({
   return (
     <div className="space-y-5">
       <Link
-        href="/dashboard"
+        href="/konten"
         className="inline-block text-sm text-slate-500 transition hover:text-slate-800"
       >
-        ← Dashboard
+        ← Konten
       </Link>
 
       <div className={`overflow-hidden rounded-2xl border bg-white ${t?.accent.border ?? "border-slate-200"}`}>

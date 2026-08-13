@@ -16,12 +16,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
 
-          <nav className="flex gap-1">
+          <nav className="-mx-1 flex flex-1 gap-1 overflow-x-auto px-1">
             <NavLink href="/dashboard">Dashboard</NavLink>
-            <NavLink href="/capture">Capture</NavLink>
+            <NavLink href="/keuangan">Keuangan</NavLink>
+            <NavLink href="/konten">Konten</NavLink>
+            <NavLink href="/sosmed">Sosmed</NavLink>
           </nav>
 
-          <div className="ml-auto">
+          <div className="shrink-0">
             <LogoutButton />
           </div>
         </div>
