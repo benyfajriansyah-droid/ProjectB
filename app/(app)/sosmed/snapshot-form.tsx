@@ -78,7 +78,7 @@ export default function SnapshotForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-2xl border-2 border-dashed border-slate-300 py-4 text-sm font-medium text-slate-500 transition hover:border-violet-400 hover:bg-violet-50/50 hover:text-violet-700"
+        className="w-full rounded-xl border border-dashed border-ink-faint py-4 text-sm font-medium text-ink-muted transition hover:border-ink-muted hover:bg-plane hover:text-ink"
       >
         + Catat angka akun
       </button>
@@ -86,21 +86,22 @@ export default function SnapshotForm() {
   }
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
+    <div className="space-y-4 rounded-xl border border-hairline bg-surface p-5">
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-500">Akun</label>
+        <label className="text-xs font-medium text-ink-muted">Akun</label>
         <div className="flex flex-wrap gap-2">
           {TEMAS.map((t) => (
             <button
               key={t.id}
               onClick={() => switchTema(t.id)}
-              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-medium transition-colors"
+              style={
                 t.id === temaId
-                  ? `${t.accent.chipBg} ${t.accent.chipText} ${t.accent.border}`
-                  : "border-slate-200 text-slate-500 hover:bg-slate-50"
-              }`}
+                  ? { backgroundColor: t.tint, color: t.color, borderColor: t.color }
+                  : { borderColor: "rgba(11,11,11,0.09)", color: "#5c5b55" }
+              }
             >
-              <span className={`h-2 w-2 rounded-full ${t.accent.dot}`} />
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: t.color }} />
               {t.short}
             </button>
           ))}
@@ -113,7 +114,7 @@ export default function SnapshotForm() {
             key={p}
             onClick={() => setPlatform(p)}
             className={`rounded-xl py-2.5 text-sm font-semibold transition ${
-              platform === p ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+              platform === p ? "bg-ink text-white" : "bg-plane text-ink-muted hover:bg-plane"
             }`}
           >
             {PLATFORM_LABELS[p]}
@@ -128,41 +129,41 @@ export default function SnapshotForm() {
           { label: "Engagement", value: engagement, set: setEngagement },
         ].map((field) => (
           <div key={field.label} className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-500">{field.label}</label>
+            <label className="text-xs font-medium text-ink-muted">{field.label}</label>
             <input
               inputMode="numeric"
               value={field.value}
               onChange={(e) => field.set(e.target.value.replace(/[^\d]/g, ""))}
               placeholder="—"
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+              className="w-full rounded-xl border border-hairline px-3 py-2.5 text-sm outline-none transition focus:border-ink-muted "
             />
           </div>
         ))}
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-500">Tanggal</label>
+        <label className="text-xs font-medium text-ink-muted">Tanggal</label>
         <input
           type="date"
           value={recordedOn}
           onChange={(e) => setRecordedOn(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-violet-400"
+          className="w-full rounded-xl border border-hairline px-3 py-2.5 text-sm outline-none focus:border-ink-muted"
         />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-critical">{error}</p>}
 
       <div className="flex gap-2">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex-1 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
+          className="flex-1 rounded-xl bg-ink py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
         >
           {saving ? "Menyimpan…" : "Simpan"}
         </button>
         <button
           onClick={() => setOpen(false)}
-          className="rounded-xl border border-slate-200 px-5 text-sm text-slate-600 transition hover:bg-slate-50"
+          className="rounded-xl border border-hairline px-5 text-sm text-ink-secondary transition hover:bg-plane"
         >
           Batal
         </button>

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { KATEGORI_KELUAR, KATEGORI_MASUK, type TxKind } from "@/lib/finance";
+import { KATEGORI_KELUAR, KATEGORI_MASUK, type TxKind } from "@/lib/money";
 
 function todayLocal(): string {
   const now = new Date();
@@ -78,7 +78,7 @@ export default function TransactionForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-2xl border-2 border-dashed border-slate-300 py-4 text-sm font-medium text-slate-500 transition hover:border-violet-400 hover:bg-violet-50/50 hover:text-violet-700"
+        className="w-full rounded-xl border border-dashed border-ink-faint py-4 text-sm font-medium text-ink-muted transition hover:border-ink-muted hover:bg-plane hover:text-ink"
       >
         + Catat transaksi
       </button>
@@ -86,7 +86,7 @@ export default function TransactionForm() {
   }
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
+    <div className="space-y-4 rounded-xl border border-hairline bg-surface p-5">
       <div className="grid grid-cols-2 gap-2">
         {(["masuk", "keluar"] as const).map((k) => (
           <button
@@ -95,9 +95,9 @@ export default function TransactionForm() {
             className={`rounded-xl py-2.5 text-sm font-semibold transition ${
               kind === k
                 ? k === "masuk"
-                  ? "bg-emerald-600 text-white"
-                  : "bg-rose-600 text-white"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                  ? "bg-[#0a7d0a] text-white"
+                  : "bg-[#a33030] text-white"
+                : "bg-plane text-ink-muted hover:bg-plane"
             }`}
           >
             {k === "masuk" ? "Pemasukan" : "Pengeluaran"}
@@ -106,27 +106,27 @@ export default function TransactionForm() {
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-500">Nominal</label>
+        <label className="text-xs font-medium text-ink-muted">Nominal</label>
         <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400">Rp</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-ink-faint">Rp</span>
           <input
             inputMode="numeric"
             value={amount}
             onChange={(e) => setAmount(formatThousands(e.target.value))}
             placeholder="0"
             autoFocus
-            className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-lg font-semibold text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+            className="w-full rounded-xl border border-hairline py-3 pl-10 pr-4 text-lg font-semibold text-ink outline-none transition focus:border-ink-muted "
           />
         </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-500">Kategori</label>
+          <label className="text-xs font-medium text-ink-muted">Kategori</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-violet-400"
+            className="w-full rounded-xl border border-hairline px-3 py-2.5 text-sm outline-none focus:border-ink-muted"
           >
             {categories.map((c) => (
               <option key={c} value={c}>
@@ -137,54 +137,54 @@ export default function TransactionForm() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-500">Tanggal</label>
+          <label className="text-xs font-medium text-ink-muted">Tanggal</label>
           <input
             type="date"
             value={occurredOn}
             onChange={(e) => setOccurredOn(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-violet-400"
+            className="w-full rounded-xl border border-hairline px-3 py-2.5 text-sm outline-none focus:border-ink-muted"
           />
         </div>
       </div>
 
       {kind === "masuk" && (
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-500">
-            Venture / sumber <span className="text-slate-400">(opsional)</span>
+          <label className="text-xs font-medium text-ink-muted">
+            Venture / sumber <span className="text-ink-faint">(opsional)</span>
           </label>
           <input
             value={venture}
             onChange={(e) => setVenture(e.target.value)}
             placeholder="mis. Belajar AI, jasa editing, affiliate…"
-            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-violet-400"
+            className="w-full rounded-xl border border-hairline px-3 py-2.5 text-sm outline-none focus:border-ink-muted"
           />
         </div>
       )}
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-500">
-          Catatan <span className="text-slate-400">(opsional)</span>
+        <label className="text-xs font-medium text-ink-muted">
+          Catatan <span className="text-ink-faint">(opsional)</span>
         </label>
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-violet-400"
+          className="w-full rounded-xl border border-hairline px-3 py-2.5 text-sm outline-none focus:border-ink-muted"
         />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-critical">{error}</p>}
 
       <div className="flex gap-2">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex-1 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
+          className="flex-1 rounded-xl bg-ink py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
         >
           {saving ? "Menyimpan…" : "Simpan"}
         </button>
         <button
           onClick={() => setOpen(false)}
-          className="rounded-xl border border-slate-200 px-5 text-sm text-slate-600 transition hover:bg-slate-50"
+          className="rounded-xl border border-hairline px-5 text-sm text-ink-secondary transition hover:bg-plane"
         >
           Batal
         </button>

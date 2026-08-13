@@ -5,11 +5,12 @@ import { useState } from "react";
 import {
   PLATFORM_LABELS,
   STATUSES,
+  STATUS_INK,
   STATUS_LABELS,
-  STATUS_STYLES,
   type Status,
 } from "@/lib/constants";
 import type { Idea } from "@/lib/ideas";
+import { Card } from "@/components/ui";
 
 export default function IdeaEditor({ idea }: { idea: Idea }) {
   const router = useRouter();
@@ -43,87 +44,87 @@ export default function IdeaEditor({ idea }: { idea: Idea }) {
     setSavingNotes(false);
   }
 
-  return (
-    <div className="space-y-5">
-      <div className="space-y-3">
-        {idea.executions.map((exec) => (
-          <div key={exec.id} className="rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="mb-3 flex items-center gap-2">
-              <span className="text-sm font-semibold text-slate-800">
-                {PLATFORM_LABELS[exec.platform]}
-              </span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${STATUS_STYLES[exec.status]}`}
-              >
-                {STATUS_LABELS[exec.status]}
-              </span>
-              {savingExec === exec.id && (
-                <span className="ml-auto text-xs text-slate-400">menyimpan…</span>
-              )}
-            </div>
+  const field =
+    "w-full rounded-lg border border-hairline px-3 py-2 text-[13px] text-ink outline-none transition-colors focus:border-ink-muted";
 
-            <div className="mb-3 flex flex-wrap gap-1.5">
-              {STATUSES.map((s) => (
+  return (
+    <div className="space-y-4">
+      {idea.executions.map((exec) => (
+        <Card key={exec.id} className="p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-[13px] font-medium text-ink">
+              {PLATFORM_LABELS[exec.platform]}
+            </span>
+            {savingExec === exec.id && (
+              <span className="ml-auto text-[11px] text-ink-faint">menyimpan…</span>
+            )}
+          </div>
+
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {STATUSES.map((s) => {
+              const active = exec.status === s;
+              return (
                 <button
                   key={s}
                   onClick={() => updateExecution(exec.id, { status: s })}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition ring-1 ring-inset ${
-                    exec.status === s
-                      ? STATUS_STYLES[s]
-                      : "bg-white text-slate-400 ring-slate-200 hover:bg-slate-50 hover:text-slate-600"
-                  }`}
+                  className="rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors"
+                  style={
+                    active
+                      ? { backgroundColor: STATUS_INK[s].bg, color: STATUS_INK[s].fg }
+                      : { color: "#8a8880", backgroundColor: "transparent" }
+                  }
                 >
                   {STATUS_LABELS[s]}
                 </button>
-              ))}
-            </div>
-
-            <div className="grid gap-2 sm:grid-cols-2">
-              <label className="space-y-1">
-                <span className="text-xs font-medium text-slate-500">Format</span>
-                <input
-                  defaultValue={exec.format ?? ""}
-                  onBlur={(e) => updateExecution(exec.id, { format: e.target.value })}
-                  placeholder="reels, carousel, story…"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
-                />
-              </label>
-              <label className="space-y-1">
-                <span className="text-xs font-medium text-slate-500">Rencana tayang</span>
-                <input
-                  type="date"
-                  defaultValue={exec.scheduledAt ?? ""}
-                  onChange={(e) => updateExecution(exec.id, { scheduledAt: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
-                />
-              </label>
-            </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-        <label className="text-xs font-medium text-slate-500">Catatan</label>
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            <label className="space-y-1">
+              <span className="text-[11px] text-ink-muted">Format</span>
+              <input
+                defaultValue={exec.format ?? ""}
+                onBlur={(e) => updateExecution(exec.id, { format: e.target.value })}
+                placeholder="reels, carousel, story…"
+                className={field}
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-[11px] text-ink-muted">Rencana tayang</span>
+              <input
+                type="date"
+                defaultValue={exec.scheduledAt ?? ""}
+                onChange={(e) => updateExecution(exec.id, { scheduledAt: e.target.value })}
+                className={field}
+              />
+            </label>
+          </div>
+        </Card>
+      ))}
+
+      <Card className="p-4">
+        <label className="text-[11px] text-ink-muted">Catatan</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
           placeholder="Detail tambahan, referensi, angle yang mau dipakai…"
-          className="mt-1 w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+          className={`${field} mt-1 resize-none placeholder:text-ink-faint`}
         />
-        <div className="mt-2 flex items-center gap-3">
+        <div className="mt-2.5 flex items-center gap-3">
           <button
             onClick={saveNotes}
             disabled={savingNotes || notes === savedNotes}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-40"
+            className="rounded-lg bg-ink px-4 py-2 text-[12px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-30"
           >
             {savingNotes ? "Menyimpan…" : "Simpan catatan"}
           </button>
           {notes !== savedNotes && (
-            <span className="text-xs text-amber-600">belum disimpan</span>
+            <span className="text-[11px] text-ink-muted">belum disimpan</span>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

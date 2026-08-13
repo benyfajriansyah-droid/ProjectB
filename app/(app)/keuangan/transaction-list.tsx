@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { formatRupiah, type Transaction } from "@/lib/finance";
+import { formatRupiah, type Transaction } from "@/lib/money";
+import { IconClose } from "@/components/icons";
 
 function formatDay(value: string): string {
   const parsed = new Date(`${value}T00:00:00`);
@@ -24,8 +25,8 @@ export default function TransactionList({ transactions }: { transactions: Transa
   if (transactions.length === 0) {
     return (
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-slate-900">Riwayat</h2>
-        <p className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-400">
+        <h2 className="text-[13px] font-semibold uppercase tracking-[0.06em] text-ink-secondary">Riwayat</h2>
+        <p className="rounded-xl border border-hairline bg-surface p-6 text-center text-[13px] text-ink-faint">
           Belum ada transaksi tercatat.
         </p>
       </section>
@@ -34,23 +35,23 @@ export default function TransactionList({ transactions }: { transactions: Transa
 
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-semibold text-slate-900">Riwayat</h2>
-      <div className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <h2 className="text-[13px] font-semibold uppercase tracking-[0.06em] text-ink-secondary">Riwayat</h2>
+      <div className="divide-y divide-rule overflow-hidden rounded-xl border border-hairline bg-surface">
         {transactions.map((tx) => (
           <div key={tx.id} className="group flex items-center gap-3 px-4 py-3">
             <span
-              className={`h-8 w-1 shrink-0 rounded-full ${tx.kind === "masuk" ? "bg-emerald-500" : "bg-rose-500"}`}
+              className={`h-8 w-1 shrink-0 rounded-full ${tx.kind === "masuk" ? "bg-[#0ca30c]" : "bg-[#d03b3b]"}`}
             />
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium text-slate-800">{tx.category}</div>
-              <div className="truncate text-xs text-slate-400">
+              <div className="text-[13px] font-medium leading-snug text-ink">{tx.category}</div>
+              <div className="mt-0.5 truncate text-[11px] text-ink-faint">
                 {formatDay(tx.occurredOn)}
                 {tx.venture && ` · ${tx.venture}`}
                 {tx.note && ` · ${tx.note}`}
               </div>
             </div>
             <span
-              className={`shrink-0 text-sm font-semibold ${tx.kind === "masuk" ? "text-emerald-600" : "text-rose-600"}`}
+              className={`shrink-0 text-[13px] font-semibold tabular-nums ${tx.kind === "masuk" ? "text-[#0a7d0a]" : "text-[#a33030]"}`}
             >
               {tx.kind === "masuk" ? "+" : "−"}
               {formatRupiah(tx.amount)}
@@ -59,9 +60,9 @@ export default function TransactionList({ transactions }: { transactions: Transa
               onClick={() => handleDelete(tx.id)}
               disabled={deleting === tx.id}
               aria-label="Hapus transaksi"
-              className="shrink-0 rounded-lg px-2 py-1 text-xs text-slate-300 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+              className="shrink-0 rounded-lg px-2 py-1 text-xs text-ink-faint transition hover:bg-[#fdf0f0] hover:text-critical disabled:opacity-50"
             >
-              ✕
+              <IconClose size={13} />
             </button>
           </div>
         ))}

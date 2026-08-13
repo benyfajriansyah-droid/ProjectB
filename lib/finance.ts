@@ -1,35 +1,14 @@
 import { query, type Row } from "./db";
+import type { MonthSummary, Transaction, TxKind } from "./money";
 
-export type TxKind = "masuk" | "keluar";
-
-export type Transaction = {
-  id: string;
-  kind: TxKind;
-  amount: number;
-  category: string;
-  venture: string | null;
-  note: string | null;
-  occurredOn: string;
-};
-
-/** Monthly income target, in rupiah. */
-export const TARGET_BULANAN = 10_000_000;
-
-export const KATEGORI_MASUK = [
-  "Konten / brand deal",
-  "Jasa / project",
-  "Produk digital",
-  "Gaji",
-  "Lainnya",
-];
-
-export const KATEGORI_KELUAR = [
-  "Operasional",
-  "Tools / langganan",
-  "Iklan",
-  "Kebutuhan pribadi",
-  "Lainnya",
-];
+export {
+  TARGET_BULANAN,
+  KATEGORI_MASUK,
+  KATEGORI_KELUAR,
+  formatRupiah,
+  formatMonth,
+} from "./money";
+export type { MonthSummary, Transaction, TxKind } from "./money";
 
 function toDateString(value: unknown): string {
   if (value instanceof Date) return value.toISOString().slice(0, 10);
@@ -87,13 +66,6 @@ export async function listTransactions(limit = 100): Promise<Transaction[]> {
   return rows.map(rowToTransaction);
 }
 
-export type MonthSummary = {
-  month: string;
-  masuk: number;
-  keluar: number;
-  bersih: number;
-};
-
 /** Totals for the last `months` calendar months, newest first. */
 export async function monthlySummaries(months = 6): Promise<MonthSummary[]> {
   const rows = await query(
@@ -131,18 +103,4 @@ export async function ventureTotalsThisMonth(): Promise<VentureTotal[]> {
     venture: row.venture as string,
     masuk: Number(row.masuk),
   }));
-}
-
-export function formatRupiah(value: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-export function formatMonth(month: string): string {
-  const [year, m] = month.split("-");
-  const date = new Date(Number(year), Number(m) - 1, 1);
-  return date.toLocaleDateString("id-ID", { month: "short", year: "numeric" });
 }

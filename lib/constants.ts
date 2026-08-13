@@ -20,109 +20,93 @@ export const STATUS_LABELS: Record<Status, string> = {
 };
 
 /**
- * Status colours follow the progression of the work: neutral while untouched,
- * warm while in progress, blue once committed to a date, green when live.
+ * The first three are stages of one process, so they take an ordinal blue ramp
+ * light-to-dark. Tayang is a completed state and takes the reserved "good"
+ * status colour; skip recedes. Every chip carries its label, so colour never
+ * has to carry the meaning alone.
  */
-export const STATUS_STYLES: Record<Status, string> = {
-  ide_baru: "bg-slate-100 text-slate-600 ring-slate-200",
-  draft: "bg-amber-50 text-amber-700 ring-amber-200",
-  terjadwal: "bg-blue-50 text-blue-700 ring-blue-200",
-  tayang: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  skip: "bg-slate-50 text-slate-400 ring-slate-200 line-through",
+export const STATUS_INK: Record<Status, { fg: string; bg: string }> = {
+  ide_baru: { fg: "#1c5cab", bg: "#e8f0fd" },
+  draft: { fg: "#175293", bg: "#dbe8fb" },
+  terjadwal: { fg: "#0d366b", bg: "#cde2fb" },
+  tayang: { fg: "#0a7d0a", bg: "#e4f5e4" },
+  skip: { fg: "#8a8880", bg: "#f0efec" },
 };
 
-/** Full class strings, not interpolated — Tailwind only keeps classes it can see. */
-export type Accent = {
-  dot: string;
-  bar: string;
-  chipBg: string;
-  chipText: string;
-  softBg: string;
-  border: string;
-};
-
+/**
+ * Identity colours, taken in the validated categorical order. The ordering is
+ * the colourblind-safety mechanism, not decoration — re-run the palette
+ * validator before changing it. Verified: worst adjacent pair ΔE 19.6 normal
+ * vision, 9.1 under simulated CVD.
+ */
 export const TEMAS: {
   id: TemaId;
   label: string;
   short: string;
+  color: string;
+  tint: string;
   handles: Partial<Record<Platform, string>>;
-  accent: Accent;
 }[] = [
   {
     id: "belajar_ai",
     label: "Belajar AI bareng Beny",
     short: "Belajar AI",
+    color: "#2a78d6",
+    tint: "#eaf2fd",
     handles: { ig: "@belajaraibarengbeny", tiktok: "@belajaraibarengbeny" },
-    accent: {
-      dot: "bg-violet-500",
-      bar: "bg-violet-500",
-      chipBg: "bg-violet-50",
-      chipText: "text-violet-700",
-      softBg: "bg-violet-50/60",
-      border: "border-violet-100",
-    },
   },
   {
     id: "kirana_larasati",
     label: "Cerita Kirana Larasati",
     short: "Kirana",
+    color: "#eb6834",
+    tint: "#fdeee8",
     handles: { ig: "@ceritakirana.larasati" },
-    accent: {
-      dot: "bg-rose-500",
-      bar: "bg-rose-500",
-      chipBg: "bg-rose-50",
-      chipText: "text-rose-700",
-      softBg: "bg-rose-50/60",
-      border: "border-rose-100",
-    },
   },
   {
     id: "daily_life_nara",
     label: "Daily Life Nara",
     short: "Nara",
+    color: "#1baf7a",
+    tint: "#e6f7f0",
     handles: { ig: "@dailylifenaraa", tiktok: "@dailylifenara" },
-    accent: {
-      dot: "bg-orange-500",
-      bar: "bg-orange-500",
-      chipBg: "bg-orange-50",
-      chipText: "text-orange-700",
-      softBg: "bg-orange-50/60",
-      border: "border-orange-100",
-    },
   },
   {
     id: "liburan_seru",
     label: "Liburan Seru bareng Bem",
     short: "Liburan",
+    color: "#eda100",
+    tint: "#fdf3e0",
     handles: { ig: "@liburanserubarengbem", tiktok: "@liburanserubarengbem" },
-    accent: {
-      dot: "bg-teal-500",
-      bar: "bg-teal-500",
-      chipBg: "bg-teal-50",
-      chipText: "text-teal-700",
-      softBg: "bg-teal-50/60",
-      border: "border-teal-100",
-    },
   },
   {
     id: "cerita_kopi",
     label: "Cerita Kopi Beny",
     short: "Kopi",
+    color: "#e87ba4",
+    tint: "#fdedf3",
     handles: { ig: "@ceritakopibeny", tiktok: "@ceritakopibeny" },
-    accent: {
-      dot: "bg-amber-600",
-      bar: "bg-amber-600",
-      chipBg: "bg-amber-50",
-      chipText: "text-amber-800",
-      softBg: "bg-amber-50/60",
-      border: "border-amber-100",
-    },
   },
 ];
+
+/** Single-series chart marks and the reference line for the target. */
+export const CHART_INK = {
+  series: "#2a78d6",
+  seriesSoft: "#cde2fb",
+  reference: "#8a8880",
+  grid: "#e6e5df",
+  good: "#0ca30c",
+  critical: "#d03b3b",
+};
 
 export const PLATFORM_LABELS: Record<Platform, string> = {
   ig: "Instagram",
   tiktok: "TikTok",
+};
+
+export const PLATFORM_SHORT: Record<Platform, string> = {
+  ig: "IG",
+  tiktok: "TT",
 };
 
 export function tema(id: string) {
@@ -131,6 +115,10 @@ export function tema(id: string) {
 
 export function temaLabel(id: string): string {
   return tema(id)?.label ?? id;
+}
+
+export function temaColor(id: string): string {
+  return tema(id)?.color ?? "#8a8880";
 }
 
 export function platformsForTema(id: string): Platform[] {
