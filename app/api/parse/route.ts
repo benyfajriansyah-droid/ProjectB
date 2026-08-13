@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseIdeaText } from "@/lib/ai/parse";
 import { MISSING_GEMINI_KEY_MESSAGE } from "@/lib/ai/gemini";
+import { listThemes } from "@/lib/accounts";
 
 export async function POST(request: NextRequest) {
   const { rawText } = (await request.json()) as { rawText?: string };
@@ -14,7 +15,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const parsed = await parseIdeaText(rawText);
+    const themes = await listThemes();
+    if (themes.length === 0) {
+      return NextResponse.json(
+        { error: "Belum ada akun. Tambahkan akun dulu di halaman Akun." },
+        { status: 400 },
+      );
+    }
+    const parsed = await parseIdeaText(rawText, themes);
     return NextResponse.json(parsed);
   } catch (err) {
     // Surfaced rather than swallowed: this is a single-user app, and a generic

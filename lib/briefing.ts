@@ -3,7 +3,8 @@ import { query } from "./db";
 import { TARGET_BULANAN, formatRupiah, monthlySummaries, ventureTotalsThisMonth } from "./finance";
 import { accountStates, listSnapshots } from "./social";
 import { listIdeas } from "./ideas";
-import { TEMAS, PLATFORM_LABELS, temaLabel } from "./constants";
+import { PLATFORM_LABELS } from "./constants";
+import { listThemes } from "./accounts";
 
 export type Briefing = { body: string; date: string };
 
@@ -14,12 +15,14 @@ function today(): string {
 
 /** Everything the model is allowed to reason from, as plain text. */
 async function gatherFacts(): Promise<string> {
-  const [months, ventures, snapshots, ideas] = await Promise.all([
+  const [months, ventures, snapshots, ideas, themes] = await Promise.all([
     monthlySummaries(3),
     ventureTotalsThisMonth(),
     listSnapshots(60),
     listIdeas(),
+    listThemes(),
   ]);
+  const labelOf = (key: string) => themes.find((t) => t.key === key)?.label ?? key;
 
   const current = months[0];
   const lines: string[] = [];
@@ -62,7 +65,7 @@ async function gatherFacts(): Promise<string> {
           ? ` (${state.latest.followers - state.previous.followers >= 0 ? "+" : ""}${state.latest.followers - state.previous.followers} sejak catatan sebelumnya)`
           : "";
       parts.push(
-        `${temaLabel(state.tema)} di ${PLATFORM_LABELS[state.platform]}: ${state.latest.followers ?? "?"} follower${growth}`,
+        `${labelOf(state.tema)} di ${PLATFORM_LABELS[state.platform]}: ${state.latest.followers ?? "?"} follower${growth}`,
       );
     }
     if (parts.length) lines.push(`Sosial media: ${parts.join("; ")}.`);
@@ -72,7 +75,7 @@ async function gatherFacts(): Promise<string> {
 
   const executions = ideas.flatMap((i) => i.executions);
   lines.push(
-    `Konten: ${ideas.length} ide tersimpan di ${TEMAS.length} tema — ` +
+    `Konten: ${ideas.length} ide tersimpan di ${themes.length} tema — ` +
       `${executions.filter((e) => e.status === "ide_baru").length} belum digarap, ` +
       `${executions.filter((e) => e.status === "draft").length} draft, ` +
       `${executions.filter((e) => e.status === "terjadwal").length} terjadwal, ` +
@@ -116,13 +119,32 @@ export async function getCachedBriefing(): Promise<Briefing | null> {
   return body ? { body, date: today() } : null;
 }
 
+declare global {
+  // eslint-disable-next-line no-var
+  var __briefingInFlight: Promise<Briefing> | undefined;
+}
+
 /** Generates and stores today's briefing, reusing it if one already exists. */
 export async function buildBriefing(force = false): Promise<Briefing> {
   if (!force) {
     const cached = await getCachedBriefing();
     if (cached) return cached;
+
+    // Two tabs opening at once would otherwise each pay for a generation.
+    if (global.__briefingInFlight) return global.__briefingInFlight;
+    const inFlight = writeBriefing();
+    global.__briefingInFlight = inFlight;
+    try {
+      return await inFlight;
+    } finally {
+      global.__briefingInFlight = undefined;
+    }
   }
 
+  return writeBriefing();
+}
+
+async function writeBriefing(): Promise<Briefing> {
   const body = await generate(await gatherFacts());
   await query(
     `INSERT INTO briefings (briefing_on, body) VALUES ($1, $2)

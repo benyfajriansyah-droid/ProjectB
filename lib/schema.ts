@@ -58,6 +58,21 @@ export const SCHEMA_STATEMENTS = [
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_social_unique
      ON social_snapshots (platform, tema, recorded_on)`,
 
+  // Accounts are data, not code, so the list can be edited without a deploy.
+  // theme_key is what ideas.tema references, so it must stay stable once used.
+  `CREATE TABLE IF NOT EXISTS accounts (
+    id TEXT PRIMARY KEY,
+    theme_key TEXT NOT NULL,
+    theme_label TEXT NOT NULL,
+    platform TEXT NOT NULL CHECK (platform IN ('ig', 'tiktok')),
+    handle TEXT,
+    color TEXT NOT NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_accounts_unique
+     ON accounts (theme_key, platform)`,
+
   // The daily briefing is generated once and reused, so opening the dashboard
   // repeatedly doesn't spend AI quota.
   `CREATE TABLE IF NOT EXISTS briefings (

@@ -1,10 +1,10 @@
 import { query, type Row } from "./db";
-import type { Platform, TemaId } from "./constants";
+import type { Platform } from "./constants";
 
 export type Snapshot = {
   id: string;
   platform: Platform;
-  tema: TemaId;
+  tema: string;
   followers: number | null;
   views: number | null;
   engagement: number | null;
@@ -21,7 +21,7 @@ function rowToSnapshot(row: Row): Snapshot {
   return {
     id: row.id as string,
     platform: row.platform as Platform,
-    tema: row.tema as TemaId,
+    tema: row.tema as string,
     followers: row.followers === null ? null : Number(row.followers),
     views: row.views === null ? null : Number(row.views),
     engagement: row.engagement === null ? null : Number(row.engagement),
@@ -36,7 +36,7 @@ function rowToSnapshot(row: Row): Snapshot {
  */
 export async function saveSnapshot(input: {
   platform: Platform;
-  tema: TemaId;
+  tema: string;
   followers?: number | null;
   views?: number | null;
   engagement?: number | null;
@@ -75,7 +75,7 @@ export async function listSnapshots(limit = 200): Promise<Snapshot[]> {
 
 export type AccountState = {
   platform: Platform;
-  tema: TemaId;
+  tema: string;
   latest: Snapshot | null;
   previous: Snapshot | null;
 };

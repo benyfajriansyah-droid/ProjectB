@@ -1,5 +1,5 @@
 import { query, type Row } from "./db";
-import type { Platform, Status, TemaId } from "./constants";
+import type { Platform, Status } from "./constants";
 
 export type PlatformExecution = {
   id: string;
@@ -14,7 +14,7 @@ export type Idea = {
   id: string;
   rawText: string;
   hook: string;
-  tema: TemaId;
+  tema: string;
   notes: string | null;
   createdAt: string;
   executions: PlatformExecution[];
@@ -28,7 +28,7 @@ export type NewExecution = {
 export type NewIdea = {
   rawText: string;
   hook: string;
-  tema: TemaId;
+  tema: string;
   notes?: string | null;
   executions: NewExecution[];
 };
@@ -50,7 +50,7 @@ function rowToIdea(row: Row): Omit<Idea, "executions"> {
     id: row.id as string,
     rawText: row.raw_text as string,
     hook: row.hook as string,
-    tema: row.tema as TemaId,
+    tema: row.tema as string,
     notes: (row.notes as string | null) ?? null,
     createdAt: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt),
   };

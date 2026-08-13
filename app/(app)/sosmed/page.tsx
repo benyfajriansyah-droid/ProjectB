@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { MISSING_DATABASE_MESSAGE, isDbConfigured } from "@/lib/db";
 import { accountStates, delta, listSnapshots } from "@/lib/social";
-import { PLATFORM_LABELS, TEMAS, type Platform } from "@/lib/constants";
+import { listThemes } from "@/lib/accounts";
+import { PLATFORM_LABELS } from "@/lib/constants";
 import { Card, PageTitle, SectionHead, TemaDot } from "@/components/ui";
 import { Sparkline } from "@/components/charts";
 import SnapshotForm from "./snapshot-form";
@@ -50,7 +52,7 @@ export default async function SosmedPage() {
     );
   }
 
-  const snapshots = await listSnapshots(400);
+  const [snapshots, themes] = await Promise.all([listSnapshots(400), listThemes()]);
   const states = accountStates(snapshots);
 
   const historyFor = (tema: string, platform: string) =>
@@ -67,69 +69,85 @@ export default async function SosmedPage() {
       />
 
       <div className="space-y-7">
-        <SnapshotForm />
+        {themes.length === 0 ? (
+          <Card className="px-6 py-10 text-center">
+            <h2 className="text-[15px] font-semibold text-ink">Belum ada akun</h2>
+            <p className="mx-auto mt-1.5 max-w-sm text-[13px] leading-relaxed text-ink-muted">
+              Tambahkan akun sosial media lo dulu, baru angkanya bisa dicatat di sini.
+            </p>
+            <Link
+              href="/akun"
+              className="mt-5 inline-block rounded-lg bg-ink px-5 py-2.5 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
+            >
+              Atur akun
+            </Link>
+          </Card>
+        ) : (
+          <>
+            <SnapshotForm themes={themes} />
 
-        <div className="space-y-3">
-          {TEMAS.map((t) => {
-            const platforms = Object.keys(t.handles) as Platform[];
+            <div className="space-y-3">
+              {themes.map((t) => (
+                <Card key={t.key} className="overflow-hidden">
+                  <div className="flex items-center gap-2 border-b border-rule px-4 py-2.5">
+                    <TemaDot color={t.color} size={8} />
+                    <span className="text-[13px] font-medium text-ink">{t.label}</span>
+                  </div>
 
-            return (
-              <Card key={t.id} className="overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-rule px-4 py-2.5">
-                  <TemaDot color={t.color} size={8} />
-                  <span className="text-[13px] font-medium text-ink">{t.label}</span>
-                </div>
+                  <div className="divide-y divide-rule">
+                    {t.accounts.map((account) => {
+                      const state = states.get(`${t.key}:${account.platform}`);
+                      const latest = state?.latest;
+                      const previous = state?.previous;
+                      const history = historyFor(t.key, account.platform);
 
-                <div className="divide-y divide-rule">
-                  {platforms.map((platform) => {
-                    const state = states.get(`${t.id}:${platform}`);
-                    const latest = state?.latest;
-                    const previous = state?.previous;
-                    const history = historyFor(t.id, platform);
-
-                    return (
-                      <div key={platform} className="px-4 py-3">
-                        <div className="mb-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="text-[12px] font-medium text-ink-secondary">
-                            {PLATFORM_LABELS[platform]}
-                          </span>
-                          <span className="text-[11px] text-ink-faint">{t.handles[platform]}</span>
-                          <span className="ml-auto flex items-center gap-2">
-                            <Sparkline values={history} width={72} height={22} />
-                            <span className="text-[11px] text-ink-faint">
-                              {latest ? latest.recordedOn : "belum ada data"}
+                      return (
+                        <div key={account.id} className="px-4 py-3">
+                          <div className="mb-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span className="text-[12px] font-medium text-ink-secondary">
+                              {PLATFORM_LABELS[account.platform]}
                             </span>
-                          </span>
-                        </div>
+                            <span className="text-[11px] text-ink-faint">{account.handle}</span>
+                            <span className="ml-auto flex items-center gap-2">
+                              <Sparkline values={history} width={72} height={22} />
+                              <span className="text-[11px] text-ink-faint">
+                                {latest ? latest.recordedOn : "belum ada data"}
+                              </span>
+                            </span>
+                          </div>
 
-                        <div className="grid grid-cols-3 gap-4">
-                          <Metric
-                            label="Follower"
-                            value={latest?.followers ?? null}
-                            change={delta(latest?.followers ?? null, previous?.followers ?? null)}
-                          />
-                          <Metric
-                            label="Views"
-                            value={latest?.views ?? null}
-                            change={delta(latest?.views ?? null, previous?.views ?? null)}
-                          />
-                          <Metric
-                            label="Engagement"
-                            value={latest?.engagement ?? null}
-                            change={delta(
-                              latest?.engagement ?? null,
-                              previous?.engagement ?? null,
-                            )}
-                          />
+                          <div className="grid grid-cols-3 gap-4">
+                            <Metric
+                              label="Follower"
+                              value={latest?.followers ?? null}
+                              change={delta(
+                                latest?.followers ?? null,
+                                previous?.followers ?? null,
+                              )}
+                            />
+                            <Metric
+                              label="Views"
+                              value={latest?.views ?? null}
+                              change={delta(latest?.views ?? null, previous?.views ?? null)}
+                            />
+                            <Metric
+                              label="Engagement"
+                              value={latest?.engagement ?? null}
+                              change={delta(
+                                latest?.engagement ?? null,
+                                previous?.engagement ?? null,
+                              )}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
 
         <section>
           <SectionHead title="Kenapa masih manual" />

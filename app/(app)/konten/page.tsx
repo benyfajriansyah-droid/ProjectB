@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { listIdeas, type Idea } from "@/lib/ideas";
 import { MISSING_DATABASE_MESSAGE, isDbConfigured } from "@/lib/db";
-import { TEMAS, temaColor } from "@/lib/constants";
+import { listThemes, type Theme } from "@/lib/accounts";
 import { relativeDay } from "@/lib/insights";
 import { Card, EmptyNote, PageTitle, SectionHead, StatusChip, TemaDot } from "@/components/ui";
 import { IconCalendar } from "@/components/icons";
@@ -17,7 +17,7 @@ function nextDate(idea: Idea): string | null {
   return dates[0] ?? null;
 }
 
-function IdeaRow({ idea }: { idea: Idea }) {
+function IdeaRow({ idea, color }: { idea: Idea; color: string }) {
   const date = nextDate(idea);
 
   return (
@@ -26,7 +26,7 @@ function IdeaRow({ idea }: { idea: Idea }) {
       className="flex items-start gap-2.5 px-4 py-3 transition-colors hover:bg-plane"
     >
       <span className="mt-1.5">
-        <TemaDot color={temaColor(idea.tema)} />
+        <TemaDot color={color} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[13px] leading-snug text-ink">{idea.hook}</span>
@@ -60,7 +60,8 @@ export default async function KontenPage() {
     );
   }
 
-  const ideas = await listIdeas();
+  const [ideas, themes] = await Promise.all([listIdeas(), listThemes()]);
+  const colorOf = (key: string) => themes.find((t) => t.key === key)?.color ?? "#8a8880";
 
   if (ideas.length === 0) {
     return (
@@ -90,7 +91,7 @@ export default async function KontenPage() {
 
   return (
     <>
-      <PageTitle title="Konten" subtitle={`${ideas.length} ide di ${TEMAS.length} tema`} />
+      <PageTitle title="Konten" subtitle={`${ideas.length} ide di ${themes.length} tema`} />
 
       <div className="space-y-7">
         {inProgress.length > 0 && (
@@ -100,7 +101,7 @@ export default async function KontenPage() {
               <ul className="divide-y divide-rule">
                 {inProgress.map((idea) => (
                   <li key={idea.id}>
-                    <IdeaRow idea={idea} />
+                    <IdeaRow idea={idea} color={colorOf(idea.tema)} />
                   </li>
                 ))}
               </ul>
@@ -115,7 +116,7 @@ export default async function KontenPage() {
               <ul className="divide-y divide-rule">
                 {fresh.map((idea) => (
                   <li key={idea.id}>
-                    <IdeaRow idea={idea} />
+                    <IdeaRow idea={idea} color={colorOf(idea.tema)} />
                   </li>
                 ))}
               </ul>
@@ -126,14 +127,14 @@ export default async function KontenPage() {
         <section>
           <SectionHead title="Per tema" />
           <div className="grid gap-3 lg:grid-cols-2">
-            {TEMAS.map((t) => {
-              const temaIdeas = ideas.filter((i) => i.tema === t.id);
+            {themes.map((t) => {
+              const temaIdeas = ideas.filter((i) => i.tema === t.key);
               const live = temaIdeas
                 .flatMap((i) => i.executions)
                 .filter((e) => e.status === "tayang").length;
 
               return (
-                <Card key={t.id} className="overflow-hidden">
+                <Card key={t.key} className="overflow-hidden">
                   <div className="flex items-center gap-2 border-b border-rule px-4 py-2.5">
                     <TemaDot color={t.color} size={8} />
                     <span className="text-[13px] font-medium text-ink">{t.label}</span>

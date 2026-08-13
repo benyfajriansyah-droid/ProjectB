@@ -1,16 +1,17 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { MISSING_DATABASE_MESSAGE, isDbConfigured } from "@/lib/db";
 import { TARGET_BULANAN, formatRupiah, monthlySummaries } from "@/lib/finance";
 import { accountStates, delta, listSnapshots } from "@/lib/social";
 import { listIdeas } from "@/lib/ideas";
-import { getCachedBriefing } from "@/lib/briefing";
 import { getMarkets, getNews } from "@/lib/feeds";
 import { computePace, overdue, relativeDay, weekAhead } from "@/lib/insights";
-import { PLATFORM_LABELS, PLATFORM_SHORT, temaColor, temaLabel } from "@/lib/constants";
+import { PLATFORM_LABELS, PLATFORM_SHORT } from "@/lib/constants";
+import { listThemes } from "@/lib/accounts";
 import { Card, EmptyNote, PageTitle, SectionHead, StatusChip, TemaDot } from "@/components/ui";
 import { Meter, Sparkline } from "@/components/charts";
 import { IconAlert, IconArrowDown, IconArrowUp, IconCalendar } from "@/components/icons";
-import BriefingCard from "./briefing-card";
+import BriefingSection, { BriefingSkeleton } from "./briefing-section";
 
 export const dynamic = "force-dynamic";
 
@@ -34,14 +35,17 @@ export default async function DashboardPage() {
     );
   }
 
-  const [months, snapshots, ideas, briefing, news, markets] = await Promise.all([
+  const [months, snapshots, ideas, news, markets, themes] = await Promise.all([
     monthlySummaries(1),
     listSnapshots(120),
     listIdeas(),
-    getCachedBriefing(),
     getNews(3),
     getMarkets(),
+    listThemes(),
   ]);
+
+  const colorOf = (key: string) => themes.find((t) => t.key === key)?.color ?? "#8a8880";
+  const labelOf = (key: string) => themes.find((t) => t.key === key)?.label ?? key;
 
   const current = months[0];
   const masuk = current?.masuk ?? 0;
@@ -73,7 +77,9 @@ export default async function DashboardPage() {
       />
 
       <div className="space-y-7">
-        <BriefingCard initial={briefing?.body ?? null} />
+        <Suspense fallback={<BriefingSkeleton />}>
+          <BriefingSection />
+        </Suspense>
 
         {telat.length > 0 && (
           <Card className="border-critical/30 bg-[#fdf0f0]">
@@ -191,7 +197,7 @@ export default async function DashboardPage() {
                         href={`/idea/${idea.id}`}
                         className="flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-plane"
                       >
-                        <TemaDot color={temaColor(idea.tema)} />
+                        <TemaDot color={colorOf(idea.tema)} />
                         <span className="min-w-0 flex-1 truncate text-[13px] text-ink">
                           {idea.hook}
                         </span>
@@ -268,9 +274,9 @@ export default async function DashboardPage() {
                       key={`${state.tema}:${state.platform}`}
                       className="flex items-center gap-3 px-4 py-2.5"
                     >
-                      <TemaDot color={temaColor(state.tema)} />
+                      <TemaDot color={colorOf(state.tema)} />
                       <span className="min-w-0 flex-1 truncate text-[13px] text-ink">
-                        {temaLabel(state.tema)}
+                        {labelOf(state.tema)}
                       </span>
                       <span className="w-6 shrink-0 text-[11px] font-medium text-ink-muted">
                         {PLATFORM_SHORT[state.platform]}

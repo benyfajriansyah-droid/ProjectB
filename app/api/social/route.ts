@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveSnapshot } from "@/lib/social";
-import { TEMAS, type Platform, type TemaId } from "@/lib/constants";
+import { listThemes } from "@/lib/accounts";
+import type { Platform } from "@/lib/constants";
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as {
     platform?: Platform;
-    tema?: TemaId;
+    tema?: string;
     followers?: number | null;
     views?: number | null;
     engagement?: number | null;
@@ -15,7 +16,8 @@ export async function POST(request: NextRequest) {
   if (body.platform !== "ig" && body.platform !== "tiktok") {
     return NextResponse.json({ error: "Platform tidak valid" }, { status: 400 });
   }
-  if (!body.tema || !TEMAS.some((t) => t.id === body.tema)) {
+  const themes = await listThemes();
+  if (!body.tema || !themes.some((t) => t.key === body.tema)) {
     return NextResponse.json({ error: "Tema tidak valid" }, { status: 400 });
   }
   if (!body.recordedOn) {

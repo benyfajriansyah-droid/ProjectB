@@ -1,10 +1,3 @@
-export type TemaId =
-  | "belajar_ai"
-  | "kirana_larasati"
-  | "daily_life_nara"
-  | "liburan_seru"
-  | "cerita_kopi";
-
 export type Platform = "ig" | "tiktok";
 
 export type Status = "ide_baru" | "draft" | "terjadwal" | "tayang" | "skip";
@@ -34,59 +27,59 @@ export const STATUS_INK: Record<Status, { fg: string; bg: string }> = {
 };
 
 /**
- * Identity colours, taken in the validated categorical order. The ordering is
- * the colourblind-safety mechanism, not decoration — re-run the palette
- * validator before changing it. Verified: worst adjacent pair ΔE 19.6 normal
- * vision, 9.1 under simulated CVD.
+ * Identity colours in the validated categorical order. The ordering is the
+ * colourblind-safety mechanism, not decoration — re-run the palette validator
+ * before changing it. Verified on white: worst adjacent pair ΔE 19.6 normal
+ * vision, 9.1 under simulated CVD. New personas take the next unused slot.
  */
-export const TEMAS: {
-  id: TemaId;
-  label: string;
-  short: string;
+export const PALETTE_SLOTS = [
+  "#2a78d6", // blue
+  "#eb6834", // orange
+  "#1baf7a", // aqua
+  "#eda100", // yellow
+  "#e87ba4", // magenta
+  "#008300", // green
+  "#4a3aa7", // violet
+  "#e34948", // red
+];
+
+/** Soft background paired with each slot, for selected chips. */
+export const PALETTE_TINTS: Record<string, string> = {
+  "#2a78d6": "#eaf2fd",
+  "#eb6834": "#fdeee8",
+  "#1baf7a": "#e6f7f0",
+  "#eda100": "#fdf3e0",
+  "#e87ba4": "#fdedf3",
+  "#008300": "#e6f4e6",
+  "#4a3aa7": "#eeecf9",
+  "#e34948": "#fdecec",
+};
+
+export function tintFor(color: string): string {
+  return PALETTE_TINTS[color] ?? "#f0efec";
+}
+
+/**
+ * What a brand-new database starts with. After the first run the accounts table
+ * is the source of truth and this list is never consulted again.
+ */
+export const SEED_ACCOUNTS: {
+  themeKey: string;
+  themeLabel: string;
+  platform: Platform;
+  handle: string;
   color: string;
-  tint: string;
-  handles: Partial<Record<Platform, string>>;
+  sortOrder: number;
 }[] = [
-  {
-    id: "belajar_ai",
-    label: "Belajar AI bareng Beny",
-    short: "Belajar AI",
-    color: "#2a78d6",
-    tint: "#eaf2fd",
-    handles: { ig: "@belajaraibarengbeny", tiktok: "@belajaraibarengbeny" },
-  },
-  {
-    id: "kirana_larasati",
-    label: "Cerita Kirana Larasati",
-    short: "Kirana",
-    color: "#eb6834",
-    tint: "#fdeee8",
-    handles: { ig: "@ceritakirana.larasati" },
-  },
-  {
-    id: "daily_life_nara",
-    label: "Daily Life Nara",
-    short: "Nara",
-    color: "#1baf7a",
-    tint: "#e6f7f0",
-    handles: { ig: "@dailylifenaraa", tiktok: "@dailylifenara" },
-  },
-  {
-    id: "liburan_seru",
-    label: "Liburan Seru bareng Bem",
-    short: "Liburan",
-    color: "#eda100",
-    tint: "#fdf3e0",
-    handles: { ig: "@liburanserubarengbem", tiktok: "@liburanserubarengbem" },
-  },
-  {
-    id: "cerita_kopi",
-    label: "Cerita Kopi Beny",
-    short: "Kopi",
-    color: "#e87ba4",
-    tint: "#fdedf3",
-    handles: { ig: "@ceritakopibeny", tiktok: "@ceritakopibeny" },
-  },
+  { themeKey: "belajar_ai", themeLabel: "Belajar AI bareng Beny", platform: "ig", handle: "@belajaraibarengbeny", color: "#2a78d6", sortOrder: 1 },
+  { themeKey: "belajar_ai", themeLabel: "Belajar AI bareng Beny", platform: "tiktok", handle: "@belajaraibarengbeny", color: "#2a78d6", sortOrder: 2 },
+  { themeKey: "kirana_larasati", themeLabel: "Cerita Kirana Larasati", platform: "ig", handle: "@ceritakirana.larasati", color: "#eb6834", sortOrder: 3 },
+  { themeKey: "daily_life_nara", themeLabel: "Daily Life Nara", platform: "ig", handle: "@dailylifenaraa", color: "#1baf7a", sortOrder: 4 },
+  { themeKey: "daily_life_nara", themeLabel: "Daily Life Nara", platform: "tiktok", handle: "@dailylifenara", color: "#1baf7a", sortOrder: 5 },
+  { themeKey: "liburan_seru", themeLabel: "Liburan Seru bareng Bem", platform: "ig", handle: "@liburanserubarengbem", color: "#eda100", sortOrder: 6 },
+  { themeKey: "liburan_seru", themeLabel: "Liburan Seru bareng Bem", platform: "tiktok", handle: "@liburanserubarengbem", color: "#eda100", sortOrder: 7 },
+  { themeKey: "cerita_kopi", themeLabel: "Cerita Kopi Beny", platform: "ig", handle: "@ceritakopibeny", color: "#e87ba4", sortOrder: 8 },
+  { themeKey: "cerita_kopi", themeLabel: "Cerita Kopi Beny", platform: "tiktok", handle: "@ceritakopibeny", color: "#e87ba4", sortOrder: 9 },
 ];
 
 /** Single-series chart marks and the reference line for the target. */
@@ -99,6 +92,8 @@ export const CHART_INK = {
   critical: "#d03b3b",
 };
 
+export const PLATFORMS: Platform[] = ["ig", "tiktok"];
+
 export const PLATFORM_LABELS: Record<Platform, string> = {
   ig: "Instagram",
   tiktok: "TikTok",
@@ -108,21 +103,3 @@ export const PLATFORM_SHORT: Record<Platform, string> = {
   ig: "IG",
   tiktok: "TT",
 };
-
-export function tema(id: string) {
-  return TEMAS.find((t) => t.id === id);
-}
-
-export function temaLabel(id: string): string {
-  return tema(id)?.label ?? id;
-}
-
-export function temaColor(id: string): string {
-  return tema(id)?.color ?? "#8a8880";
-}
-
-export function platformsForTema(id: string): Platform[] {
-  const found = tema(id);
-  if (!found) return [];
-  return Object.keys(found.handles) as Platform[];
-}

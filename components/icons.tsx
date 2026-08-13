@@ -139,3 +139,18 @@ export const IconNews = (p: IconProps) => (
     <path d="M7 9h6M7 12.5h6M7 16h4" />
   </Svg>
 );
+
+export const IconUsers = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="9" cy="8" r="3.2" />
+    <path d="M3 20a6 6 0 0 1 12 0" />
+    <path d="M16.5 5.6a3.2 3.2 0 0 1 0 6.2M18 14.6a6 6 0 0 1 3 5.4" />
+  </Svg>
+);
+
+export const IconTrash = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 6.5h16M9.5 6.5V4.8a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.7" />
+    <path d="M6.5 6.5 7.4 19a1 1 0 0 0 1 .9h7.2a1 1 0 0 0 1-.9l.9-12.5" />
+  </Svg>
+);

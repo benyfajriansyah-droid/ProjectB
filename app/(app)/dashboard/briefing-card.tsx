@@ -3,10 +3,16 @@
 import { useState } from "react";
 import { IconSpark } from "@/components/icons";
 
-export default function BriefingCard({ initial }: { initial: string | null }) {
+export default function BriefingCard({
+  initial,
+  initialError = null,
+}: {
+  initial: string | null;
+  initialError?: string | null;
+}) {
   const [body, setBody] = useState(initial);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
 
   async function generate() {
     setLoading(true);
@@ -55,8 +61,7 @@ export default function BriefingCard({ initial }: { initial: string | null }) {
 
         {!error && !body && (
           <p className="text-[14px] leading-relaxed text-white/50">
-            AI baca keuangan, sosmed, dan konten lo — terus kasih penilaian jujur plus tiga langkah
-            buat hari ini.
+            Belum ada briefing hari ini. Klik Perbarui untuk menyusunnya sekarang.
           </p>
         )}
 

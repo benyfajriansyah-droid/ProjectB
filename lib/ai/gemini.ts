@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { TEMAS, platformsForTema, type Platform, type TemaId } from "../constants";
+import type { Platform } from "../constants";
+import type { Theme } from "../accounts";
 import type { IdeaParser } from "./parse";
 
 export const MISSING_GEMINI_KEY_MESSAGE =
@@ -15,17 +16,16 @@ function client() {
   return new GoogleGenAI({ apiKey });
 }
 
-const temaList = TEMAS.map((t) => `- ${t.id}: ${t.label}`).join("\n");
-
 /**
  * Constrains the model's output shape so a malformed reply can't reach the
  * parser — the API rejects anything off-schema before we see it.
  */
-const RESPONSE_SCHEMA = {
+function responseSchema(themes: Theme[]) {
+  return {
   type: Type.OBJECT,
   properties: {
     hook: { type: Type.STRING },
-    tema: { type: Type.STRING, enum: TEMAS.map((t) => t.id) },
+    tema: { type: Type.STRING, enum: themes.map((t) => t.key) },
     platforms: {
       type: Type.ARRAY,
       items: {
@@ -39,7 +39,8 @@ const RESPONSE_SCHEMA = {
     },
   },
   required: ["hook", "tema", "platforms"],
-};
+  };
+}
 
 type RawResponse = {
   hook: string;
@@ -47,7 +48,8 @@ type RawResponse = {
   platforms: { platform: string; format: string }[];
 };
 
-function buildPrompt(rawText: string): string {
+function buildPrompt(rawText: string, themes: Theme[]): string {
+  const temaList = themes.map((t) => `- ${t.key}: ${t.label}`).join("\n");
   return `Kamu membantu content creator mengorganisir ide konten mentah menjadi data terstruktur.
 
 Tema yang tersedia (pilih salah satu id):
@@ -65,15 +67,15 @@ ${rawText}
 }
 
 export const geminiParser: IdeaParser = {
-  async parse(rawText) {
+  async parse(rawText, themes) {
     const ai = client();
 
     const response = await ai.models.generateContent({
       model: process.env.GEMINI_MODEL ?? DEFAULT_MODEL,
-      contents: buildPrompt(rawText),
+      contents: buildPrompt(rawText, themes),
       config: {
         responseMimeType: "application/json",
-        responseSchema: RESPONSE_SCHEMA,
+        responseSchema: responseSchema(themes),
       },
     });
 
@@ -84,10 +86,9 @@ export const geminiParser: IdeaParser = {
 
     const raw = JSON.parse(text) as RawResponse;
 
-    const tema: TemaId = TEMAS.some((t) => t.id === raw.tema)
-      ? (raw.tema as TemaId)
-      : TEMAS[0].id;
-    const allowedPlatforms = new Set(platformsForTema(tema));
+    const picked = themes.find((t) => t.key === raw.tema) ?? themes[0];
+    const tema = picked.key;
+    const allowedPlatforms = new Set(picked.accounts.map((a) => a.platform));
 
     const executions = (raw.platforms ?? [])
       .filter((p) => allowedPlatforms.has(p.platform as Platform))

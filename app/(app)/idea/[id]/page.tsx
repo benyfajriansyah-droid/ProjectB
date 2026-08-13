@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getIdea } from "@/lib/ideas";
-import { tema } from "@/lib/constants";
+import { listThemes } from "@/lib/accounts";
 import { Card, TemaDot } from "@/components/ui";
 import IdeaEditor from "./idea-editor";
 
@@ -13,10 +13,10 @@ export default async function IdeaDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const idea = await getIdea(id);
+  const [idea, themes] = await Promise.all([getIdea(id), listThemes()]);
   if (!idea) notFound();
 
-  const t = tema(idea.tema);
+  const t = themes.find((x) => x.key === idea.tema);
 
   return (
     <>

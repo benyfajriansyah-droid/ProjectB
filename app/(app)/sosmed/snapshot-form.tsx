@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { PLATFORM_LABELS, TEMAS, platformsForTema, type Platform, type TemaId } from "@/lib/constants";
+import { PLATFORM_LABELS, tintFor, type Platform } from "@/lib/constants";
+import type { Theme } from "@/lib/accounts";
 
 function todayLocal(): string {
   const now = new Date();
@@ -14,10 +15,10 @@ function toNumber(value: string): number | null {
   return digits ? Number(digits) : null;
 }
 
-export default function SnapshotForm() {
+export default function SnapshotForm({ themes }: { themes: Theme[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [temaId, setTemaId] = useState<TemaId>(TEMAS[0].id);
+  const [temaId, setTemaId] = useState<string>(themes[0]?.key ?? "");
   const [platform, setPlatform] = useState<Platform>("ig");
   const [followers, setFollowers] = useState("");
   const [views, setViews] = useState("");
@@ -26,12 +27,14 @@ export default function SnapshotForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const available = platformsForTema(temaId);
+  const platformsFor = (key: string): Platform[] =>
+    themes.find((t) => t.key === key)?.accounts.map((a) => a.platform) ?? [];
+  const available = platformsFor(temaId);
 
-  function switchTema(next: TemaId) {
+  function switchTema(next: string) {
     setTemaId(next);
-    const allowed = platformsForTema(next);
-    if (!allowed.includes(platform)) setPlatform(allowed[0]);
+    const allowed = platformsFor(next);
+    if (allowed.length && !allowed.includes(platform)) setPlatform(allowed[0]);
   }
 
   async function handleSave() {
@@ -90,14 +93,14 @@ export default function SnapshotForm() {
       <div className="space-y-1.5">
         <label className="text-xs font-medium text-ink-muted">Akun</label>
         <div className="flex flex-wrap gap-2">
-          {TEMAS.map((t) => (
+          {themes.map((t) => (
             <button
-              key={t.id}
-              onClick={() => switchTema(t.id)}
+              key={t.key}
+              onClick={() => switchTema(t.key)}
               className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-medium transition-colors"
               style={
-                t.id === temaId
-                  ? { backgroundColor: t.tint, color: t.color, borderColor: t.color }
+                t.key === temaId
+                  ? { backgroundColor: tintFor(t.color), color: t.color, borderColor: t.color }
                   : { borderColor: "rgba(11,11,11,0.09)", color: "#5c5b55" }
               }
             >
